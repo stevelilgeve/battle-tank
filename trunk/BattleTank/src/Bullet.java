@@ -152,7 +152,7 @@ class Bullet extends Sprite {
 
 	void explode() {
 		setVisible(false);
-		Explosion.explode(getX(), getY(), Explosion.SMALL);
+		Explosion.explode(getRefPixelX(), getRefPixelY(), Explosion.SMALL);
 	}
 
 	public static void stopAllBullets() {
