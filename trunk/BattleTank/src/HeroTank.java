@@ -27,6 +27,10 @@ public class HeroTank extends Tank {
 	private boolean shouldDrive;
 	private boolean shouldShoot;
 
+	private static final int[][] ANIMATION = new int[][] {
+		{ 0 }, { 1 }, { 2 }, { 3 }
+	};
+
 	HeroTank() {
 		super();
 		
@@ -34,6 +38,10 @@ public class HeroTank extends Tank {
 
 		speed = 2;
 		bullet1 = bullet2 = null;
+	}
+	
+	protected int[][] getAnimation() {
+		return ANIMATION;
 	}
 	
 	public void tick() {
