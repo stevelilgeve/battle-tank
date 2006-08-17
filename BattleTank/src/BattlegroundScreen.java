@@ -210,9 +210,20 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 
 	private void drawGameOver() {
 		if (gameOver) {
-			graphics.setColor(0x00FF0000);
 			graphics.setFont(bigBoldFont);
-			graphics.drawString("GAME OVER", getWidth() / 2, getHeight() / 2,
+			graphics.setColor(0x00FFFFFF);
+			int x = getWidth() / 2;
+			int y = getHeight() / 2;
+			graphics.drawString("GAME OVER", x-1, y-1,
+					Graphics.BASELINE | Graphics.HCENTER);
+			graphics.drawString("GAME OVER", x+1, y-1,
+					Graphics.BASELINE | Graphics.HCENTER);
+			graphics.drawString("GAME OVER", x-1, y+1,
+					Graphics.BASELINE | Graphics.HCENTER);
+			graphics.drawString("GAME OVER", x+1, y+1,
+					Graphics.BASELINE | Graphics.HCENTER);
+			graphics.setColor(0x00FF0000);
+			graphics.drawString("GAME OVER", x, y,
 					Graphics.BASELINE | Graphics.HCENTER);
 			graphics.setFont(Font.getDefaultFont());
 		}
