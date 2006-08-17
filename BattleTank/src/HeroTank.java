@@ -6,12 +6,12 @@ public class HeroTank extends Tank {
 	/**
 	 * When this reaches zero, game is over.
 	 */
-	private int livesLeft;
+	protected int livesLeft;
 	
 	/**
 	 * Current score of the player.
 	 */
-	private int score;
+	protected int score;
 	
 	/**
 	 * Hero can own up to two bullets.
@@ -24,6 +24,9 @@ public class HeroTank extends Tank {
 	 */
 	private int invulnerabilityTicks;
 
+	private boolean shouldDrive;
+	private boolean shouldShoot;
+
 	HeroTank() {
 		super();
 		
@@ -32,17 +35,17 @@ public class HeroTank extends Tank {
 		speed = 2;
 		bullet1 = bullet2 = null;
 	}
+	
+	public void tick() {
+		super.tick();
 
-	void tick(int direction, boolean shoot) {
-		changeDirection(direction);
-
-		if (direction != BattlegroundScreen.NONE)
+		if (shouldDrive)
 			drive();
 		
 		if (invulnerabilityTicks > 0)
 			--invulnerabilityTicks;
 
-		if (shoot) {
+		if (shouldShoot) {
 			if (!isShooting) {
 				isShooting = true;
 				shoot();
@@ -61,7 +64,7 @@ public class HeroTank extends Tank {
 		}
 	}
 
-	void shoot() {
+	public void shoot() {
 		// FIXME Look at the powerups and shoot fast and strong bullets.
 		if (bullet1 != null && bullet2 != null)
 			return;
@@ -91,7 +94,7 @@ public class HeroTank extends Tank {
 		bullet2 = Bullet.shoot(x, y, direction, Bullet.FAST, true);
 	}
 
-	void hit() {
+	public void hit() {
 		if (invulnerabilityTicks > 0)
 			return;
 		explode();
@@ -125,6 +128,12 @@ public class HeroTank extends Tank {
 		becomeInvulnerable();
 		changeDirection(BattlegroundScreen.NORTH);
 		setVisible(true);
+	}
+
+	public void getUserInput(int direction, boolean shoot) {
+		changeDirection(direction);
+		shouldDrive = direction != BattlegroundScreen.NONE;
+		shouldShoot = shoot;
 	}
 
 }

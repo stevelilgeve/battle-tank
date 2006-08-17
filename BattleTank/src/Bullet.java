@@ -4,13 +4,13 @@ import javax.microedition.lcdui.game.Sprite;
 
 class Bullet extends Sprite {
 
-	static final int WIDTH = 3;
+	public static final int WIDTH = 3;
 
-	static final int HEIGHT = 5;
+	public static final int HEIGHT = 5;
 
-	static final int SLOW = 6;
+	public static final int SLOW = 6;
 
-	static final int FAST = 8;
+	public static final int FAST = 8;
 
 	private static final Image BULLET_IMAGE;
 

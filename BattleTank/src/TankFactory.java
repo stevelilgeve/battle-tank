@@ -1,16 +1,16 @@
 class TankFactory {
 
-	static final int HERO_TANK = 0;
+	public static final int HERO_TANK = 0;
 
-	static final int SIMPLE_TANK = 1;
+	public static final int SIMPLE_TANK = 1;
 
-	static final int FAST_TANK = 2;
+	public static final int FAST_TANK = 2;
 
-	static final int SMART_TANK = 3;
+	public static final int SMART_TANK = 3;
 
-	static final int HEAVY_TANK = 4;
+	public static final int HEAVY_TANK = 4;
 
-	static Tank createTank(int tankClass) {
+	public static Tank createTank(int tankClass) {
 		switch (tankClass) {
 		case HERO_TANK:
 			return new HeroTank();

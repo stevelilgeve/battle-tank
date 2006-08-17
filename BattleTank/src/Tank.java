@@ -6,14 +6,14 @@ abstract class Tank extends Sprite {
 
 	protected int speed;
 
-	static final int WIDTH = 16;
+	public static final int WIDTH = 16;
 
-	static final int HEIGHT = 16;
+	public static final int HEIGHT = 16;
 
-	static final Image TANKS_IMAGE = BattleTankMIDlet
+	private static final Image TANKS_IMAGE = BattleTankMIDlet
 			.createImage("/Objects.png");
 
-	static final int[][] animation = { { 0 }, { 1 }, { 2 }, { 3 } };
+	private static final int[][] animation = { { 0 }, { 1 }, { 2 }, { 3 } };
 
 	static final int POOL_SIZE = 20;
 
@@ -25,13 +25,13 @@ abstract class Tank extends Sprite {
 		initEnemyPool("");
 	}
 
-	boolean isAlive = true;
+	protected boolean isAlive = true;
 
-	boolean isShooting = false;
+	protected boolean isShooting = false;
 
-	int direction = BattlegroundScreen.NORTH;
+	protected int direction = BattlegroundScreen.NORTH;
 
-	int animationTick;
+	protected int animationTick;
 
 	/**
 	 * 
@@ -107,7 +107,7 @@ abstract class Tank extends Sprite {
 			move(-dx, -dy);
 	}
 
-	void changeDirection(int direction) {
+	public void changeDirection(int direction) {
 		if (direction == this.direction) {
 			// nextFrame(); // TODO Animate tracks.
 			return;
@@ -179,12 +179,12 @@ abstract class Tank extends Sprite {
 	 * can override this method to shoot different bullets
 	 * of different strength and speed.
 	 */
-	abstract void shoot();
+	abstract public void shoot();
 
 	/**
 	 * Be hit by a bullet.
 	 */
-	abstract void hit();
+	abstract public void hit();
 
 	/**
 	 * Player has collected {@see Powerup.CLOCK}. Enemies should freeze for a few seconds.

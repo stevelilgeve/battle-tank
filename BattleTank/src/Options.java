@@ -18,7 +18,7 @@ public class Options extends Form implements CommandListener {
 	private Display display;
 	private Displayable prev;
 
-	ChoiceGroup difficultyGroup;
+	private ChoiceGroup difficultyGroup;
 
 	private Command ok;
 	private Command cancel;

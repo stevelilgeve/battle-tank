@@ -3,19 +3,19 @@ import java.io.IOException;
 import javax.microedition.lcdui.game.TiledLayer;
 
 class Battleground extends TiledLayer {
-	static final int WIDTH_IN_TILES = 13;
+	public static final int WIDTH_IN_TILES = 13;
 
-	static final int HEIGHT_IN_TILES = 13;
+	public static final int HEIGHT_IN_TILES = 13;
 
-	static final int TILE_WIDTH = 16;
+	public static final int TILE_WIDTH = 16;
 
-	static final int TILE_HEIGHT = 16;
+	public static final int TILE_HEIGHT = 16;
 
-	static final int BRICK_WALL = 21;
+	private static final int BRICK_WALL = 21;
 
-	static final int CONCRETE_WALL = 22;
+	private static final int CONCRETE_WALL = 22;
 
-	static final int FOREST = 29;
+	private static final int FOREST = 29;
 
 	private static int[][] waterFrames = { { 23, 24 }, { 24, 23 } };
 
@@ -95,7 +95,7 @@ class Battleground extends TiledLayer {
 		setAnimatedTile(-1 - tile, waterFrames[tile][(tickState % 4) / 2]);
 	}
 
-	boolean containsImpassableArea(int x, int y, int width, int height) {
+	public boolean containsImpassableArea(int x, int y, int width, int height) {
 		int rowMin = y / TILE_HEIGHT;
 		int rowMax = (y + height - 1) / TILE_HEIGHT;
 		int columnMin = x / TILE_WIDTH;
