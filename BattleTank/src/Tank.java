@@ -170,7 +170,7 @@ abstract class Tank extends Sprite {
 	 * Explode a tank.
 	 */
 	protected void explode() {
-		Explosion.explode(getX() + WIDTH / 2, getY() + HEIGHT / 2, Explosion.BIG);
+		Explosion.explode(getRefPixelX(), getRefPixelY(), Explosion.BIG);
 		setVisible(false);
 	}
 
