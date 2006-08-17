@@ -13,7 +13,7 @@ abstract class Tank extends Sprite {
 	private static final Image TANKS_IMAGE = BattleTankMIDlet
 			.createImage("/Objects.png");
 
-	private static final int[][] animation = { { 0 }, { 1 }, { 2 }, { 3 } };
+	private final int[][] animation = getAnimation();
 
 	static final int POOL_SIZE = 20;
 
@@ -51,7 +51,6 @@ abstract class Tank extends Sprite {
 
 	Tank() {
 		super(TANKS_IMAGE, WIDTH, HEIGHT);
-		// defineCollisionRectangle(1, 1, WIDTH - 2, HEIGHT - 2);
 		defineReferencePixel(WIDTH / 2, HEIGHT / 2);
 	}
 	
@@ -173,6 +172,8 @@ abstract class Tank extends Sprite {
 		Explosion.explode(getRefPixelX(), getRefPixelY(), Explosion.BIG);
 		setVisible(false);
 	}
+	
+	abstract protected int[][] getAnimation();
 
 	/**
 	 * Shoot the bullet in the given direction. Subclasses
