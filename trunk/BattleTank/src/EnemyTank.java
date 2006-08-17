@@ -37,7 +37,7 @@ abstract class EnemyTank extends Tank {
 	/**
 	 * Perform some AI and decide where to go and whether to shoot or not.
 	 */
-	void think() {
+	private void think() {
 		if ((animationTick & 0x07) == 0) {
 			if (BattleTankMIDlet.random(5) == 0) {
 				/* Pick direction. Randomly. */
@@ -55,7 +55,7 @@ abstract class EnemyTank extends Tank {
 	/**
 	 * Enemy tanks explode immediately. Override if you want to add extra logic.
 	 */
-	void hit() {
+	public void hit() {
 		explode();
 	}
 
@@ -74,7 +74,7 @@ abstract class EnemyTank extends Tank {
 	/**
 	 * Shoot 
 	 */
-	void shoot() {
+	public void shoot() {
 		if (bullet != null)
 			return;
 	

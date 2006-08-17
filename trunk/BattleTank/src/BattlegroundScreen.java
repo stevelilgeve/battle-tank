@@ -156,8 +156,10 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 	}
 
 	private void tick() {
-		if (!gameOver)
-			hero.tick(direction, shoot);
+		if (!gameOver) {
+			hero.getUserInput(direction, shoot);
+			hero.tick();
+		}
 		Explosion.tickExplosions();
 		Bullet.tickBullets();
 		Tank.tickEnemies();
@@ -226,6 +228,9 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 			graphics.drawString("GAME OVER", x, y,
 					Graphics.BASELINE | Graphics.HCENTER);
 			graphics.setFont(Font.getDefaultFont());
+		} else {
+			graphics.setColor(0x00FFFFFF);
+			graphics.drawString(String.valueOf(hero.livesLeft), 0, 0, Graphics.TOP | Graphics.LEFT);
 		}
 	}
 
