@@ -15,8 +15,6 @@ class Explosion extends Sprite {
 		{ 0, 1, 2, 3, 1 },
 	};
 
-	private int strength;
-
 	private static final Image EXPLOSION_IMAGE = BattleTankMIDlet
 			.createImage("/Explosion.png");
 
@@ -32,13 +30,11 @@ class Explosion extends Sprite {
 
 	private Explosion(int strength) {
 		super(EXPLOSION_IMAGE, WIDTH, HEIGHT);
-		this.strength = strength;
 		defineReferencePixel(WIDTH / 2, HEIGHT / 2);
 		setVisible(false);
 	}
 
 	private void setStrength(int strength) {
-		this.strength = strength;
 		setFrameSequence(FRAME_SEQ[strength]);
 	}
 
