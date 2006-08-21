@@ -36,7 +36,7 @@ public class HeroTank extends Tank {
 		
 		livesLeft = INITIAL_LIVES;
 
-		speed = 2;
+		speed = 3;
 		bullet1 = bullet2 = null;
 	}
 	

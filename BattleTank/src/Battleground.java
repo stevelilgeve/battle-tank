@@ -68,7 +68,7 @@ class Battleground extends TiledLayer {
 			case '!':
 			case '.':
 			case ' ':
-				x++;
+				setCell(x++, y, 0);
 				break;
 			default:
 			}
