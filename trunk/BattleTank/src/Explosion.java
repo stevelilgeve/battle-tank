@@ -11,8 +11,8 @@ class Explosion extends Sprite {
 	public static final int HEIGHT = 32;
 	
 	private static final int[][] FRAME_SEQ = new int[][] {
-		{ 0, 1 },
-		{ 0, 1, 2, 3, 1 },
+		{ 0, 1, 1 },
+		{ 0, 1, 1, 2, 2, 3, 3, 1 },
 	};
 
 	private static final Image EXPLOSION_IMAGE = BattleTankMIDlet

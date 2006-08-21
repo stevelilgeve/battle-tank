@@ -18,7 +18,7 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 	public static final int SOUTH = 2;
 	public static final int WEST = 3;
 
-	private static final int MILLIS_PER_TICK = 50;
+	private static final int MILLIS_PER_TICK = 75;
 
 	private final BattleTankMIDlet midlet;
 
