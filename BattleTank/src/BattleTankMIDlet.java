@@ -8,7 +8,7 @@ import javax.microedition.midlet.MIDlet;
 public class BattleTankMIDlet extends MIDlet {
 	private static final Random random = new Random();
 
-	private static BattlegroundScreen battleground;
+	public static BattlegroundScreen battleground;
 
 	public BattleTankMIDlet() {
 	}
@@ -17,7 +17,10 @@ public class BattleTankMIDlet extends MIDlet {
 		Displayable current = Display.getDisplay(this).getCurrent();
 		if (current == null) {
 			// FIXME A splash screen should be created instead.
-			battleground = new BattlegroundScreen(this);
+			SplashScreen ss = new SplashScreen(this);
+			Display.getDisplay(this).setCurrent(ss);
+		}
+		if(battleground != null){
 			Display.getDisplay(this).setCurrent(battleground);
 			battleground.start();
 		}
@@ -62,7 +65,9 @@ public class BattleTankMIDlet extends MIDlet {
 
 	public void splashScreenDone() {
 		// TODO Auto-generated method stub
-		
+		battleground = new BattlegroundScreen(this);
+		Display.getDisplay(this).setCurrent(battleground);
+		battleground.start();
 	}
 
 	/**

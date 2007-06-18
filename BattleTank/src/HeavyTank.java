@@ -28,5 +28,14 @@ public class HeavyTank extends EnemyTank {
 	protected int getBulletSpeed() {
 		return Bullet.SLOW;
 	}
+	
+	protected int getBulletStrength(){
+		return 2;
+	}
 
+	
+	protected int getScore(){
+		return 500;
+	}
+	
 }

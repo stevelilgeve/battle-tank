@@ -2,7 +2,6 @@ public class HeroTank extends Tank {
 
 	// TODO Set this to a correct value after debugging.
 	private static final int INITIAL_LIVES = 2;
-
 	/**
 	 * When this reaches zero, game is over.
 	 */
@@ -11,7 +10,7 @@ public class HeroTank extends Tank {
 	/**
 	 * Current score of the player.
 	 */
-	protected int score;
+	public int score;
 	
 	/**
 	 * Hero can own up to two bullets.
@@ -23,6 +22,8 @@ public class HeroTank extends Tank {
 	 * and can become invulnerable if collects {@see Powerup.SHIELD}.
 	 */
 	private int invulnerabilityTicks;
+
+	private Explosion explodingHero;
 
 	private boolean shouldDrive;
 	private boolean shouldShoot;
@@ -96,10 +97,10 @@ public class HeroTank extends Tank {
 		}
 
 		if (bullet1 == null) {
-			bullet1 = Bullet.shoot(x, y, direction, Bullet.SLOW, true);
+			bullet1 = Bullet.shoot(x, y, direction, Bullet.SLOW, true,1);
 			return;
 		}
-		bullet2 = Bullet.shoot(x, y, direction, Bullet.FAST, true);
+		bullet2 = Bullet.shoot(x, y, direction, Bullet.FAST, true,1);
 	}
 
 	public void hit() {
@@ -109,13 +110,25 @@ public class HeroTank extends Tank {
 	}
 
 	protected void explode() {
-		super.explode();
+		explodingHero = Explosion.explode(getRefPixelX(), getRefPixelY(), Explosion.BIG);
+		setVisible(false);
+		//layerManager.remove(this);
 		if (--livesLeft < 0) {
 			BattleTankMIDlet.gameOver();
-		} else
-			spawn();
+		} else{
+			explodingHero.toCallBack = this;
+			//spawn();
+		}
 	}
 
+	
+	/* Well, we've finished blowing up, so let's have another go */
+	public void doneExploding(){
+		spawn();
+		layerManager.append(this);
+	}
+
+	
 	/**
 	 * Recieve a {@see Powerup.STAR}.
 	 */

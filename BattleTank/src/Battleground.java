@@ -64,6 +64,10 @@ class Battleground extends TiledLayer {
 				break;
 
 			case '$':
+				Tank.addSpawnPoint(x,y);
+				setCell(x, y, 0);
+				x++;
+				break;
 			case '@':
 			case '!':
 			case '.':
@@ -80,7 +84,7 @@ class Battleground extends TiledLayer {
 		StringBuffer buffer = new StringBuffer();
 		while ((c = is.read()) != -1) {
 			if (c > '0')
-				buffer.append(c - '0');
+				buffer.append((char)c);
 		}
 		
 		String enemiesDescr = buffer.toString();
@@ -98,9 +102,11 @@ class Battleground extends TiledLayer {
 	public boolean containsImpassableArea(int x, int y, int width, int height) {
 		int rowMin = y / TILE_HEIGHT;
 		int rowMax = (y + height - 1) / TILE_HEIGHT;
+		if(rowMax >= HEIGHT_IN_TILES){rowMax = HEIGHT_IN_TILES - 1;}
 		int columnMin = x / TILE_WIDTH;
+		if(x < 0 || y < 0 || columnMin > WIDTH_IN_TILES -1|| rowMin > HEIGHT_IN_TILES-1){return true;}
 		int columnMax = (x + width - 1) / TILE_WIDTH;
-
+		if(columnMax >= WIDTH_IN_TILES){columnMax = WIDTH_IN_TILES - 1;}
 		for (int row = rowMin; row <= rowMax; ++row) {
 			for (int column = columnMin; column <= columnMax; ++column) {
 				int cell = getCell(column, row);
@@ -113,16 +119,16 @@ class Battleground extends TiledLayer {
 		return false;
 	}
 
-	boolean hitWall(int x, int y, boolean strong) {
+	boolean hitWall(int x, int y, int strength) {
 		int col = x / TILE_WIDTH;
 		int row = y / TILE_HEIGHT;
 		int cell = getCell(col, row);
-		if (cell == BRICK_WALL) {
+		if (cell == BRICK_WALL && strength > 0) {
 			// TODO Break walls slowly
 			setCell(col, row, 0);
 			return true;
 		} else if (cell == CONCRETE_WALL) {
-			if (strong)
+			if (strength > 1)
 				setCell(col, row, 0);
 			return true;
 		}
