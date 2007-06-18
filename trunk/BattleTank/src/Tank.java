@@ -1,6 +1,7 @@
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.game.LayerManager;
 import javax.microedition.lcdui.game.Sprite;
+import java.util.Random;
 
 abstract class Tank extends Sprite {
 
@@ -15,12 +16,15 @@ abstract class Tank extends Sprite {
 
 	private final int[][] animation = getAnimation();
 
-	static final int POOL_SIZE = 20;
+	static final int POOL_SIZE = 4;   // 1 hero + 3 others
 
 	private static Tank TANK_POOL[];
-
+	private static int enemiesToSpawn;
+	private static String enemyString;
+	protected int pool_pos;
+	
 	static {
-		TANK_POOL = new Tank[POOL_SIZE + 1];
+		TANK_POOL = new Tank[POOL_SIZE];
 		TANK_POOL[0] = new HeroTank();
 		initEnemyPool("");
 	}
@@ -32,6 +36,17 @@ abstract class Tank extends Sprite {
 	protected int direction = BattlegroundScreen.NORTH;
 
 	protected int animationTick;
+	
+	/* Places where tanks may spawn - max 8 per level. Co-ords encoded as block number, counting right and down, with top left as 0,0 */
+	static protected int[] spawnPoints = new int[8];
+	static protected int numSpawns = 1;
+	static protected Random rand = new Random();
+	static void addSpawnPoint(int x, int y){
+		if(numSpawns < 8){
+			spawnPoints[numSpawns-1] = y*13 +x;
+			numSpawns++;
+		}
+	}
 
 	/**
 	 * 
@@ -47,7 +62,7 @@ abstract class Tank extends Sprite {
 
 	private static int enemiesSpawned;
 
-	private static LayerManager layerManager;
+	protected static LayerManager layerManager;
 
 	Tank() {
 		super(TANKS_IMAGE, WIDTH, HEIGHT);
@@ -71,29 +86,25 @@ abstract class Tank extends Sprite {
 		switch (direction) {
 		case BattlegroundScreen.NORTH:
 			if ((getY() > 0)
-					&& !battleground.containsImpassableArea(getX(),
-							getY() - speed, getWidth(), speed)) {
+					&& !battleground.containsImpassableArea(getX(),getY() - speed, getWidth(), speed)) {
 				tryMove(0, -speed);
 			}
 			break;
 		case BattlegroundScreen.EAST:
 			if ((getX() < battleground.getWidth() - getWidth())
-					&& !battleground.containsImpassableArea(
-							getX() + getWidth(), getY(), speed, getHeight())) {
+					&& !battleground.containsImpassableArea(getX() + getWidth(), getY(), speed, getHeight())) {
 				tryMove(speed, 0);
 			}
 			break;
 		case BattlegroundScreen.SOUTH:
 			if ((getY() < battleground.getHeight() - getHeight())
-					&& !battleground.containsImpassableArea(getX(),
-							getY() + getHeight(), getWidth(), speed)) {
+					&& !battleground.containsImpassableArea(getX(),getY() + getHeight(), getWidth(), speed)) {
 				tryMove(0, speed);
 			}
 			break;
 		case BattlegroundScreen.WEST:
 			if ((getX() > 0)
-					&& !battleground.containsImpassableArea(getX() - speed,
-							getY(), speed, getHeight())) {
+					&& !battleground.containsImpassableArea(getX() - speed,getY(), speed, getHeight())) {
 				tryMove(-speed, 0);
 			}
 			break;
@@ -128,13 +139,13 @@ abstract class Tank extends Sprite {
 
 	static void appendToLayerManager(LayerManager manager) {
 		layerManager = manager;
-		reappendToLayerManager();
+		//reappendToLayerManager();
 	}
 
 	private static void reappendToLayerManager() {
 		if (layerManager == null)
 			return;
-		for (int i = 0; i < POOL_SIZE + 1; i++)
+		for (int i = 0; i < POOL_SIZE; i++)
 			layerManager.append(TANK_POOL[i]);
 	}
 
@@ -143,15 +154,15 @@ abstract class Tank extends Sprite {
 			--immobilizedTicks;
 			return;
 		}
-		for (int i = 1; i < POOL_SIZE + 1; i++) {
-			getEnemy(i).tick();
+		for (int i = 1; i < POOL_SIZE; i++) {
+			if(TANK_POOL[i]!=null)
+				((EnemyTank)TANK_POOL[i]).tick();
 		}
 	}
 
 	static boolean overlapsTank(Sprite sprite) {
-		for (int i = 0; i < POOL_SIZE + 1; i++) {
-			if (sprite.collidesWith(TANK_POOL[i], false)
-					&& sprite != TANK_POOL[i])
+		for (int i = 0; i < POOL_SIZE; i++) {
+			if (TANK_POOL[i]!=null && sprite != TANK_POOL[i] && sprite.collidesWith(TANK_POOL[i], false))
 				return true;
 		}
 		return false;
@@ -162,7 +173,11 @@ abstract class Tank extends Sprite {
 	}
 
 	static EnemyTank getEnemy(int i) {
-		return (EnemyTank) TANK_POOL[i];
+		if(TANK_POOL[i]!=null){
+			return (EnemyTank) TANK_POOL[i];
+		}else{
+			return null;
+		}
 	}
 
 	/**
@@ -171,6 +186,7 @@ abstract class Tank extends Sprite {
 	protected void explode() {
 		Explosion.explode(getRefPixelX(), getRefPixelY(), Explosion.BIG);
 		setVisible(false);
+		layerManager.remove(this);
 	}
 	
 	abstract protected int[][] getAnimation();
@@ -186,6 +202,9 @@ abstract class Tank extends Sprite {
 	 * Be hit by a bullet.
 	 */
 	abstract public void hit();
+	
+	/* Tank just exploded, but it's done now.*/
+	public void doneExploding(){}
 
 	/**
 	 * Player has collected {@see Powerup.CLOCK}. Enemies should freeze for a few seconds.
@@ -198,14 +217,24 @@ abstract class Tank extends Sprite {
 	 * Player has collected {@see Powerup.BOMB}. Enemies should explode immediately.
 	 */
 	public static void explodeAllEmenies() {
-		for (int i = 1; i < POOL_SIZE + 1; ++i) {
+		for (int i = 1; i < POOL_SIZE; ++i) {
 			Tank tank = TANK_POOL[i];
 			if (tank.isVisible())
 				tank.explode();
 		}
 	}
 	
+	public static void removeAllEnemies(){
+		for(int i=1; i < POOL_SIZE; ++i){
+			if(TANK_POOL[i]!=null)
+				layerManager.remove(TANK_POOL[i]);
+		}
+	}
+	
 	public static void initEnemyPool(String descr) {
+		enemiesToSpawn = descr.length();
+		enemyString = descr;
+		/*
 		if (descr.length() < POOL_SIZE) {
 			descr += "11111111111111111111";
 		}
@@ -214,16 +243,41 @@ abstract class Tank extends Sprite {
 		}
 		enemiesSpawned = 0;
 		reappendToLayerManager();
+		*/
 	}
 
-	public static void spawnNextEnemy() {
+	public static void spawnNextEnemy(int pool) {
 		// TODO Auto-generated method stub
-		if (++enemiesSpawned < POOL_SIZE) {
-			Tank enemy = TANK_POOL[enemiesSpawned];
-			enemy.setPosition(0, 0);
-			enemy.changeDirection(BattlegroundScreen.SOUTH);
-			enemy.spawn();
+		if (enemiesSpawned < enemiesToSpawn) {
+			boolean placed = false;
+			Tank enemy = TankFactory.createTank(enemyString.charAt(enemiesSpawned++));
+			int tries = 20;
+			while(!placed && tries > 0){
+				tries--;
+				int position = spawnPoints[rand.nextInt(numSpawns)];
+				int spx = (position % 13) * Battleground.TILE_WIDTH;
+				int spy = ((int)position/13)*Battleground.TILE_HEIGHT;
+				enemy.setPosition(spx,spy);
+				enemy.setVisible(true); // silly but it makes the overlaps tank thing work
+				if(!overlapsTank(enemy)){
+					placed = true;
+					enemy.changeDirection(BattlegroundScreen.SOUTH);
+					enemy.spawn();
+				}else{
+					System.out.println("tank overlapped, trying to place again");
+				}					
+			}
+			if(placed){
+				enemy.pool_pos = pool;
+				TANK_POOL[pool] = enemy;
+				layerManager.append(enemy);
+			}
 		} else {
+			System.out.println("enemies all spawned...");
+			for(int i = 1; i < POOL_SIZE; i++){
+				if(TANK_POOL[i].isVisible()){return;}
+			}
+			enemiesSpawned = 0;
 			BattleTankMIDlet.nextLevel();
 		}
 	}
@@ -235,6 +289,15 @@ abstract class Tank extends Sprite {
 
 	public static void spawnHero() {
 		getHero().spawn();
+		layerManager.append(getHero());
+	}
+	
+	public static void restart(){
+		removeAllEnemies();
+		enemiesSpawned = 0;
+		TANK_POOL = new Tank[POOL_SIZE];
+		TANK_POOL[0] = new HeroTank();
+		initEnemyPool("");
 	}
 
 }

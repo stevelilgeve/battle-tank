@@ -6,10 +6,10 @@ import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
-import javax.microedition.lcdui.game.GameCanvas;
+import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.game.LayerManager;
 
-class BattlegroundScreen extends GameCanvas implements Runnable,
+class BattlegroundScreen extends Canvas implements Runnable,
 		CommandListener {
 
 	public static final int NONE = -1;
@@ -18,17 +18,15 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 	public static final int SOUTH = 2;
 	public static final int WEST = 3;
 
-	private static final int MILLIS_PER_TICK = 75;
+	private static final int MILLIS_PER_TICK = 1; 
 
 	private final BattleTankMIDlet midlet;
 
 	private final Battleground battleground;
 
-	private final HeroTank hero;
+	private  HeroTank hero;
 
 	private final LayerManager layerManager;
-
-	private final Graphics graphics;
 
 	private static final Font bigBoldFont = Font.getFont(Font.FONT_STATIC_TEXT,
 			Font.STYLE_BOLD, Font.SIZE_LARGE);
@@ -42,20 +40,20 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 	private boolean shoot = false;
 
 	private boolean gameOver = false;
+	private int countdown = 10;
+	private boolean levelSplash = false;
 
 	/**
 	 * Current level.
 	 */
 	private int currentLevel = 0;
+	private int liveenemies = 0;
 
 	BattlegroundScreen(BattleTankMIDlet midlet) {
-		super(false);
 		this.midlet = midlet;
 		setFullScreenMode(true);
-		graphics = getGraphics();
-
+		
 		layerManager = new LayerManager();
-
 		battleground = new Battleground();
 		Tank.battleground = battleground;
 		Bullet.battleground = battleground;
@@ -82,14 +80,14 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 		
 		Bullet.stopAllBullets();
 		Explosion.stopAllExplosions();
-
+		
 		// Spawn a hero.
 		Tank.spawnHero();
-
-		// Spawn three enemies.
-		Tank.spawnNextEnemy();
-
-		// TODO Spawn two more enemies.
+		for(int i = 1; i < Tank.POOL_SIZE;i++){
+			Tank.spawnNextEnemy(i);
+		}
+		levelSplash = true;
+		countdown = 10;
 	}
 
 	private boolean readLevel(int lev) {
@@ -103,9 +101,7 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 					battleground.read(is, lev);
 					is.close();
 				} else {
-					System.out
-							.println("Could not find the game board for level "
-									+ lev);
+					System.out.println("Could not find the game board for level " + lev);
 					return false;
 				}
 			} catch (java.io.IOException ex) {
@@ -136,16 +132,16 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 				// Don't advance game or draw if canvas is covered by a system
 				// screen.
 				if (isShown()) {
-					// handleInput();
 					tick();
-					draw();
-					flushGraphics();
+					repaint();
 				}
 				timeTaken = System.currentTimeMillis() - startTime;
 				if (timeTaken < MILLIS_PER_TICK) {
 					synchronized (this) {
-						wait(MILLIS_PER_TICK - timeTaken);
-						timeTaken = System.currentTimeMillis() - startTime;
+						if(MILLIS_PER_TICK > timeTaken){
+							wait(MILLIS_PER_TICK - timeTaken);
+							timeTaken = System.currentTimeMillis() - startTime;
+						}
 					}
 				} else {
 					Thread.yield();
@@ -156,20 +152,24 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 	}
 
 	private void tick() {
-		if (!gameOver) {
+		if (!gameOver && !levelSplash) {
 			hero.getUserInput(direction, shoot);
 			hero.tick();
+		}else{
+			countdown--;
 		}
-		Explosion.tickExplosions();
-		Bullet.tickBullets();
-		Tank.tickEnemies();
-		battleground.tick();
+		if(!levelSplash){
+			Explosion.tickExplosions();
+			Bullet.tickBullets();
+			Tank.tickEnemies();
+			battleground.tick();
+		}
 	}
 
-	private void draw() {
+	public void paint(Graphics g) {
 		int width = getWidth();
 		int height = getHeight();
-
+		Graphics graphics = g;
 		graphics.setColor(0x00000000);
 		graphics.fillRect(0, 0, width, height);
 
@@ -193,29 +193,28 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 		// long time = (System.currentTimeMillis() - startTime) / 1000;
 		// int score = numSheepInFold();
 		graphics.setColor(0x00FFFFFF); // white
-		/*
-		 * graphics.drawString(Integer.toString(score), 1, 1, Graphics.TOP |
-		 * Graphics.LEFT);
-		 */
+		
+		 graphics.drawString(Integer.toString(hero.score), getWidth() -2, 1, Graphics.TOP | Graphics.RIGHT);
+		
 
-		drawFPS();
+		//drawFPS(graphics);
 
-		drawGameOver();
+		drawGameOver(graphics);
 	}
 
-	private void drawFPS() {
+	private void drawFPS(Graphics graphics) {
 		if (timeTaken == 0)
 			timeTaken = 1;
-		graphics.drawString(Long.toString(1000 / timeTaken) + "FPS",
+		graphics.drawString(Long.toString(1000 / timeTaken) + "SPF",
 				getWidth() - 2, 1, Graphics.TOP | Graphics.RIGHT);
 	}
 
-	private void drawGameOver() {
+	private void drawGameOver(Graphics graphics) {
 		if (gameOver) {
 			graphics.setFont(bigBoldFont);
-			graphics.setColor(0x00FFFFFF);
 			int x = getWidth() / 2;
 			int y = getHeight() / 2;
+			int height = graphics.getFont().getHeight();
 			graphics.drawString("GAME OVER", x-1, y-1,
 					Graphics.BASELINE | Graphics.HCENTER);
 			graphics.drawString("GAME OVER", x+1, y-1,
@@ -224,11 +223,33 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 					Graphics.BASELINE | Graphics.HCENTER);
 			graphics.drawString("GAME OVER", x+1, y+1,
 					Graphics.BASELINE | Graphics.HCENTER);
+			graphics.drawString("Press 5 To Continue",x-1,(y+height*3)-1,Graphics.BASELINE|Graphics.HCENTER);
+			graphics.drawString("Press 5 To Continue",x+1,(y+height*3)-1,Graphics.BASELINE|Graphics.HCENTER);
+			graphics.drawString("Press 5 To Continue",x-1,(y+height*3)+1,Graphics.BASELINE|Graphics.HCENTER);
+			graphics.drawString("Press 5 To Continue",x+1,(y+height*3)+1,Graphics.BASELINE|Graphics.HCENTER);
 			graphics.setColor(0x00FF0000);
 			graphics.drawString("GAME OVER", x, y,
 					Graphics.BASELINE | Graphics.HCENTER);
+			graphics.drawString("Press 5 To Continue",x,y+height*3,Graphics.BASELINE|Graphics.HCENTER);
 			graphics.setFont(Font.getDefaultFont());
-		} else {
+		} else if(levelSplash){
+			graphics.setFont(bigBoldFont);
+			int x = getWidth() / 2;
+			int y = getHeight() / 2;
+			int height = graphics.getFont().getHeight();
+			String levelString = "LEVEL " + currentLevel;
+			graphics.drawString(levelString, x-1, y-1,
+					Graphics.BASELINE | Graphics.HCENTER);
+			graphics.drawString(levelString, x+1, y-1,
+					Graphics.BASELINE | Graphics.HCENTER);
+			graphics.drawString(levelString, x-1, y+1,
+					Graphics.BASELINE | Graphics.HCENTER);
+			graphics.drawString(levelString, x+1, y+1,
+					Graphics.BASELINE | Graphics.HCENTER);
+			graphics.setColor(0x000000FF);
+			graphics.drawString(levelString, x, y,
+					Graphics.BASELINE | Graphics.HCENTER);
+		}else{
 			graphics.setColor(0x00FFFFFF);
 			graphics.drawString(String.valueOf(hero.livesLeft), 0, 0, Graphics.TOP | Graphics.LEFT);
 		}
@@ -253,6 +274,8 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 
 	protected void keyPressed(int keyCode) {
 		int gameAction = getGameAction(keyCode);
+		if(gameOver && countdown < 0){restartGame();return;}
+		if(levelSplash && countdown < 0){levelSplash = false;return;}
 		if (gameAction == UP) {
 			direction = NORTH;
 		} else if (gameAction == RIGHT) {
@@ -263,18 +286,24 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 			direction = SOUTH;
 		} else if (gameAction == FIRE) {
 			shoot = true;
+		}else if(keyCode == -8){
+			midlet.exitRequested();
 		}
 	}
+	
+	
 
 	protected void keyReleased(int keyCode) {
 		int gameAction = getGameAction(keyCode);
 		switch (gameAction) {
 		case UP:
+			if(direction == NORTH){direction = NONE; break;}
 		case DOWN:
+			if(direction == SOUTH){direction = NONE; break;}
 		case LEFT:
+			if(direction == WEST){direction = NONE; break;}
 		case RIGHT:
-			direction = NONE;
-			break;
+			if(direction == EAST){direction = NONE; break;}
 		case FIRE:
 			shoot = false;
 		}
@@ -292,6 +321,19 @@ class BattlegroundScreen extends GameCanvas implements Runnable,
 
 	public void gameOver() {
 		gameOver = true;
+		countdown = 10;
 	}
 
+	public HeroTank getHero(){ return hero;}
+	
+	private void restartGame(){
+		gameOver = false;
+		direction = NONE;
+		shoot = false;
+		currentLevel = 0;
+		liveenemies = 0;
+		Tank.restart();
+		hero = Tank.getHero();
+		nextLevel();
+	}
 }

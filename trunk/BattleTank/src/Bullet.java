@@ -14,13 +14,13 @@ class Bullet extends Sprite {
 
 	private static final Image BULLET_IMAGE;
 
-	private static final int POOL_SIZE = 20;
+	private static final int POOL_SIZE = 10;
 
 	private final int id;
 
 	private int dx, dy;
 
-	private boolean strong;
+	private int strength;
 
 	private boolean friendly;
 
@@ -43,7 +43,7 @@ class Bullet extends Sprite {
 		setVisible(false);
 	}
 
-	static Bullet shoot(int x, int y, int direction, int speed, boolean friendly) {
+	static Bullet shoot(int x, int y, int direction, int speed, boolean friendly, int strong) {
 		Bullet bullet = null;
 		for (int i = 0; i < POOL_SIZE; i++) {
 			if (!BULLET_POOL[i].isVisible()) {
@@ -56,6 +56,7 @@ class Bullet extends Sprite {
 			return null; // Too many bullets already.
 
 		bullet.friendly = friendly;
+		bullet.strength = strong;
 
 		switch (direction) {
 		case BattlegroundScreen.NORTH:
@@ -114,9 +115,9 @@ class Bullet extends Sprite {
 		// See if it hit a tank.
 		if (friendly) {
 			// See if it hit an enemy tank.
-			for (int i = 1; i <= Tank.POOL_SIZE; i++) {
+			for (int i = 1; i < Tank.POOL_SIZE; i++) {
 				EnemyTank enemy = Tank.getEnemy(i);
-				if (collidesWith(enemy, false)) {
+				if (enemy!=null && collidesWith(enemy, false)) {
 					enemy.hit();
 					explode();
 					return;
@@ -133,7 +134,7 @@ class Bullet extends Sprite {
 		}
 
 		// See if it hit a wall.
-		if (battleground.hitWall(x, y, strong)) {
+		if (battleground.hitWall(x, y, strength)) {
 			explode();
 			return;
 		}
@@ -158,5 +159,6 @@ class Bullet extends Sprite {
 	public static void stopAllBullets() {
 		for (int i = 0; i < POOL_SIZE; ++i)
 			BULLET_POOL[i].setVisible(false);		
+			
 	}
 }

@@ -1,21 +1,20 @@
 class TankFactory {
 
-	public static final int HERO_TANK = 0;
+	public static final char SIMPLE_TANK = 's';
 
-	public static final int SIMPLE_TANK = 1;
+	public static final char FAST_TANK = 'f';
 
-	public static final int FAST_TANK = 2;
+	public static final char SMART_TANK = 'S';
 
-	public static final int SMART_TANK = 3;
+	public static final char HEAVY_TANK = 'H';
 
-	public static final int HEAVY_TANK = 4;
-
-	public static Tank createTank(int tankClass) {
+	public static Tank createTank(char tankClass) {
+		System.out.println("making a new tank of type : " +tankClass);
 		switch (tankClass) {
-		case HERO_TANK:
-			return new HeroTank();
 		case HEAVY_TANK:
 			return new HeavyTank();
+		case SMART_TANK:
+			return new SmartTank();
 		default:
 			// For unknown types, just create a simple tank.
 		case SIMPLE_TANK:

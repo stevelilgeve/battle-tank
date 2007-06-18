@@ -18,10 +18,12 @@ class Explosion extends Sprite {
 	private static final Image EXPLOSION_IMAGE = BattleTankMIDlet
 			.createImage("/Explosion.png");
 
-	private static final int POOL_SIZE = 10;
+	private static final int POOL_SIZE = 5;
 
 	private static Explosion[] EXPLOSIONS_POOL;
 
+	public Tank toCallBack;
+	
 	static {
 		EXPLOSIONS_POOL = new Explosion[POOL_SIZE];
 		for (int i = 0; i < POOL_SIZE; ++i)
@@ -38,7 +40,7 @@ class Explosion extends Sprite {
 		setFrameSequence(FRAME_SEQ[strength]);
 	}
 
-	public static void explode(int x, int y, int strength) {
+	public static Explosion explode(int x, int y, int strength) {
 		for (int i = 0; i < POOL_SIZE; ++i) {
 			Explosion explosion = EXPLOSIONS_POOL[i];
 			if (!explosion.isVisible()) {
@@ -46,9 +48,10 @@ class Explosion extends Sprite {
 				explosion.setFrame(0);
 				explosion.setStrength(strength);
 				explosion.setVisible(true);
-				return;
+				return explosion;
 			}
 		}
+		return null;
 	}
 
 	public static void tickExplosions() {
@@ -63,8 +66,13 @@ class Explosion extends Sprite {
 		if (!isVisible())
 			return;
 		nextFrame();
-		if (getFrame() == 0)
+		if (getFrame() == 0){
 			setVisible(false);
+			if(toCallBack != null){
+				toCallBack.doneExploding();
+				toCallBack = null;
+			}
+		}
 	}
 
 	static void appendToLayerManager(LayerManager manager) {

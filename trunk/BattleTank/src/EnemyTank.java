@@ -9,7 +9,7 @@ abstract class EnemyTank extends Tank {
 	 * 
 	 */
 	private boolean hasPrize;
-
+	
 	EnemyTank() {
 		super();
 		setVisible(false);
@@ -37,7 +37,7 @@ abstract class EnemyTank extends Tank {
 	/**
 	 * Perform some AI and decide where to go and whether to shoot or not.
 	 */
-	private void think() {
+	protected void think() {
 		if ((animationTick & 0x07) == 0) {
 			if (BattleTankMIDlet.random(5) == 0) {
 				/* Pick direction. Randomly. */
@@ -63,11 +63,19 @@ abstract class EnemyTank extends Tank {
 	 * Explode enemy, place powerup if it has one, and spawn next enemy.
 	 */
 	protected void explode() {
-		super.explode();
+		Explosion explodingenemy = Explosion.explode(getRefPixelX(), getRefPixelY(), Explosion.BIG);
+		setVisible(false);
+		layerManager.remove(this);
+		explodingenemy.toCallBack = this;
 		if (hasPrize) {
 			Powerup.issuePowerup();
 		}
-		Tank.spawnNextEnemy();
+		Tank.getHero().score+=this.getScore();
+		
+	}
+	
+	public void doneExploding(){
+		Tank.spawnNextEnemy(pool_pos);
 	}
 
 
@@ -96,7 +104,7 @@ abstract class EnemyTank extends Tank {
 			break;
 		}
 	
-		bullet = Bullet.shoot(x, y, direction, getBulletSpeed(), false);
+		bullet = Bullet.shoot(x, y, direction, getBulletSpeed(), false,getBulletStrength());
 	}
 	
 	/**
@@ -111,4 +119,7 @@ abstract class EnemyTank extends Tank {
 	 */
 	abstract protected int getBulletSpeed();
 
+	abstract protected int getBulletStrength();
+	
+	abstract protected int getScore();
 }
